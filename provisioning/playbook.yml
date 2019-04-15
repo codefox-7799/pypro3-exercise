@@ -1,0 +1,31 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: Install aptitude packages
+      apt:
+        pkg: aptitude
+        state: present
+
+    - name: Update and upgrade apt packages
+      apt:
+        update_cache: yes
+        upgrade: full
+
+    - name: Install language-pack-ja packages
+      apt:
+        pkg: language-pack-ja
+        update_cache: yes
+    
+    - name: Set locale to ja_JP.UTF-8
+      command: update-locale LANG=ja_JP.UTF-8
+      when: ansible_env.LANG | default('') != 'ja_JP.UTF-8'
+
+    - name: Add LANGUAGE env var to .bashrc
+      lineinfile:
+        dest: /home/vagrant/.bashrc
+        line: 'export LANGUAGE=ja_JP:ja'
+
+    - name: Add TERM env var to .bashrc
+      lineinfile:
+        dest: /home/vagrant/.bashrc
+        line: 'export TERM=xterm-256color'

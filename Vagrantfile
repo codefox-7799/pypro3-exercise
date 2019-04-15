@@ -63,17 +63,8 @@ Vagrant.configure("2") do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  config.vm.provision "shell", inline: <<-SHELL
-    # Update packages
-    apt -y update
-    apt -y upgrade
-
-    # Enable japanese lang
-    apt install -y language-pack-ja
-    update-locale LANG=ja_JP.UTF-8
-    echo 'export LANGUAGE=ja_JP:ja' >> /home/vagrant/.bashrc
-
-    # Tweek teminal
-    echo 'export TERM=xterm-256color' >> /home/vagrant/.bashrc
-  SHELL
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "provisioning/playbook.yml"
+    ansible.extra_vars = { ansible_python_interpreter:"/usr/bin/python3" }
+  end
 end
