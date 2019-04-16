@@ -1,0 +1,63 @@
+---
+# tasks file for python
+- name: Install python related packages
+  apt:
+    pkg:
+      - build-essential
+      - python3-dev
+      - libsqlite3-dev
+      - libreadline6-dev
+      - libgdbm-dev
+      - zlib1g-dev
+      - libbz2-dev
+      - sqlite3
+      - tk-dev
+      - zip
+      - libssl-dev
+    update_cache: yes
+      
+- name: Check python installation
+  shell: /opt/python3.6.4/bin/python3 -V
+  register: python3_cmd_output
+  changed_when: false
+  failed_when: false
+
+- name: Get python source file
+  get_url:
+    url: https://www.python.org/ftp/python/3.6.4/Python-3.6.4.tgz
+    dest: /opt/
+  when: python3_cmd_output.rc != 0
+
+- name: Extract python source file
+  unarchive:
+      src: /opt/Python-3.6.4.tgz
+      dest: /opt/
+      remote_src: yes
+  when: python3_cmd_output.rc != 0
+
+- name: Configure python-3.6.4
+  command: ./configure --prefix=/opt/python3.6.4
+  args:
+    chdir: /opt/Python-3.6.4/
+  when: python3_cmd_output.rc != 0
+
+- name: Make python-3.6.4
+  command: make
+  args:
+    chdir: /opt/Python-3.6.4/
+  when: python3_cmd_output.rc != 0
+
+- name: Make install python-3.6.4
+  command: make install
+  args:
+    chdir: /opt/Python-3.6.4/
+  when: python3_cmd_output.rc != 0
+
+- name: Make link to /usr/local/bin
+  file:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    state: link
+  with_items:
+    - { src: /opt/python3.6.4/bin/python3.6, dest: /usr/local/bin/python3.6 }
+    - { src: /opt/python3.6.4/bin/pip3.6, dest: /usr/local/bin/pip }
